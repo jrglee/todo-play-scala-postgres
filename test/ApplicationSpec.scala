@@ -2,6 +2,8 @@ import org.scalatestplus.play._
 import play.api.test._
 import play.api.test.Helpers._
 
+import scala.util.parsing.json.JSONArray
+
 /**
  * Add your spec here.
  * You can mock out a whole application including requests, plugins etc.
@@ -17,16 +19,15 @@ class ApplicationSpec extends PlaySpec with OneAppPerTest {
 
   }
 
-  "HomeController" should {
+  "TodoController" should {
 
     "return empty content" in {
       val home = route(app, FakeRequest(GET, "/")).get
 
       status(home) mustBe OK
-      contentType(home) mustBe Some("text/plain")
-      contentAsString(home) mustEqual ""
+      contentType(home) mustBe Some("application/json")
+      contentAsJson(home).as[List[String]] mustBe empty
     }
-
   }
 
 }
