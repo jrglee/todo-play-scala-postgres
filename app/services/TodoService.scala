@@ -11,12 +11,12 @@ import play.api.db.Database
 @Singleton
 class TodoService @Inject()(db: Database) {
 
-  val dbParser = long("id") ~ str("title") ~ int("ord") ~ bool("completed") map {
+  val todoParser = long("id") ~ str("title") ~ int("ord") ~ bool("completed") map {
     case id ~ title ~ order ~ completed => Todo(id, title, order, completed)
   }
 
   def getAllTodos = db.withConnection { implicit conn =>
-    SQL("SELECT * FROM todo ORDER BY ord").as(dbParser.*)
+    SQL("SELECT * FROM todo ORDER BY ord").as(todoParser.*)
   }
 
   def getTodo(id: Long) = db.withConnection { implicit conn => getSingleTodo(id) }
@@ -38,5 +38,5 @@ class TodoService @Inject()(db: Database) {
   private def getSingleTodo(id: Long)(implicit connection: Connection) =
     SQL("SELECT * FROM todo WHERE id = {id}")
       .on("id" -> id)
-      .as(dbParser.singleOpt)
+      .as(todoParser.singleOpt)
 }
