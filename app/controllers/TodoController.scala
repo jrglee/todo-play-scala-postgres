@@ -5,16 +5,17 @@ import javax.inject._
 import play.api.libs.json.Json
 import play.api.mvc._
 import services.TodoService
+import views.TodoView
 
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 @Singleton
 class TodoController @Inject()(service: TodoService) extends Controller {
 
   def index = Action.async {
     Future(service.getAllTodos) map { todos =>
-      Ok(Json.toJson(todos))
+      Ok(Json.toJson(todos.map(TodoView.apply)))
     }
   }
 
@@ -23,8 +24,9 @@ class TodoController @Inject()(service: TodoService) extends Controller {
     val completed = (request.body \ "completed").asOpt[Boolean].getOrElse(false)
     val order = (request.body \ "order").asOpt[Int].getOrElse(0)
 
-    Future(service.addTodo(title, completed, order)) map { todo =>
-      Ok(Json.toJson(todo))
+    Future(service.addTodo(title, completed, order)) map {
+      case Some(todo) => Ok(Json.toJson(TodoView(todo)))
+      case None => Ok("")
     }
   }
 

@@ -6,4 +6,6 @@ object Todo {
   implicit val todoWriter = Json.writes[Todo]
 }
 
-case class Todo(title: String, order: Int, completed: Boolean)
+case class Todo(id: Long, title: String, order: Int, completed: Boolean) {
+  val url = s"/${id}"
+}

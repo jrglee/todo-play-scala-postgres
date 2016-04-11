@@ -10,8 +10,8 @@ import play.api.db.Database
 @Singleton
 class TodoService @Inject()(db: Database) {
 
-  val dbParser = str("title") ~ int("ord") ~ bool("completed") map {
-    case title ~ order ~ completed => Todo(title, order, completed)
+  val dbParser = long("id") ~ str("title") ~ int("ord") ~ bool("completed") map {
+    case id ~ title ~ order ~ completed => Todo(id, title, order, completed)
   }
 
   def getAllTodos = db.withConnection { implicit conn =>
