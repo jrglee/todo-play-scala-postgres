@@ -1,3 +1,4 @@
-GET           /        controllers.TodoController.index
-POST          /        controllers.TodoController.add
-DELETE        /        controllers.TodoController.remove
+GET           /todo            controllers.TodoController.index
+GET           /todo/:id        controllers.TodoController.get(id:Long)
+POST          /todo            controllers.TodoController.add
+DELETE        /todo            controllers.TodoController.remove

@@ -1,5 +1,6 @@
 package services
 
+import java.sql.Connection
 import javax.inject.{Inject, Singleton}
 
 import anorm.SqlParser._
@@ -18,14 +19,14 @@ class TodoService @Inject()(db: Database) {
     SQL("SELECT * FROM todo ORDER BY ord").as(dbParser.*)
   }
 
+  def getTodo(id: Long) = db.withConnection { implicit conn => getSingleTodo(id) }
+
   def addTodo(title: String, completed: Boolean, order: Int) = db.withConnection { implicit conn =>
     val result: Option[Long] = SQL("INSERT INTO todo(id,title,completed,ord) values(default,{title},{completed},{order})")
       .on("title" -> title, "completed" -> completed, "order" -> order)
       .executeInsert()
 
-    result.map(id => SQL("SELECT * FROM todo WHERE id = {id}")
-      .on("id" -> id)
-      .as(dbParser.single))
+    result.flatMap(getSingleTodo)
   }
 
   def removeAllTodos() {
@@ -33,4 +34,9 @@ class TodoService @Inject()(db: Database) {
       SQL("DELETE FROM todo").execute()
     }
   }
+
+  private def getSingleTodo(id: Long)(implicit connection: Connection) =
+    SQL("SELECT * FROM todo WHERE id = {id}")
+      .on("id" -> id)
+      .as(dbParser.singleOpt)
 }

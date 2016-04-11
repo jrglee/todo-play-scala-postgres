@@ -13,13 +13,20 @@ import scala.concurrent.Future
 @Singleton
 class TodoController @Inject()(service: TodoService) extends Controller {
 
-  def index = Action.async {
+  def index = Action.async { implicit request =>
     Future(service.getAllTodos) map { todos =>
       Ok(Json.toJson(todos.map(TodoView.apply)))
     }
   }
 
-  def add = Action.async(BodyParsers.parse.json) { request =>
+  def get(id: Long) = Action.async { implicit request =>
+    Future(service.getTodo(id)) map {
+      case Some(todo) => Ok(Json.toJson(TodoView(todo)))
+      case None => NotFound
+    }
+  }
+
+  def add = Action.async(BodyParsers.parse.json) { implicit request =>
     val title = (request.body \ "title").as[String]
     val completed = (request.body \ "completed").asOpt[Boolean].getOrElse(false)
     val order = (request.body \ "order").asOpt[Int].getOrElse(0)
@@ -30,7 +37,7 @@ class TodoController @Inject()(service: TodoService) extends Controller {
     }
   }
 
-  def remove = Action.async { request =>
+  def remove = Action.async { implicit request =>
     Future(service.removeAllTodos()) map { todo =>
       Ok("")
     }
