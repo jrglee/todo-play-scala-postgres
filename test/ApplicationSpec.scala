@@ -3,11 +3,12 @@ import org.scalatestplus.play._
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.Helpers._
 import play.api.test._
+import views.TodoView
 
 class ApplicationSpec extends PlaySpec with OneAppPerTest {
 
   override def newAppForTest(td: TestData) = new GuiceApplicationBuilder()
-    .configure(inMemoryDatabase())
+    .configure(inMemoryDatabase(options = Map("MODE" -> "PostgreSQL")))
     .build()
 
   "Routes" should {
@@ -24,7 +25,7 @@ class ApplicationSpec extends PlaySpec with OneAppPerTest {
 
       status(home) mustBe OK
       contentType(home) mustBe Some("application/json")
-      contentAsJson(home).as[List[String]] mustBe empty
+      contentAsJson(home).as[List[TodoView]] mustBe empty
     }
   }
 }

@@ -15,13 +15,13 @@ class TodoController @Inject()(service: TodoService) extends Controller {
 
   def index = Action.async { implicit request =>
     Future(service.getAllTodos) map { todos =>
-      Ok(Json.toJson(todos.map(TodoView.apply)))
+      Ok(Json.toJson(todos.map(TodoView.fromModel)))
     }
   }
 
   def get(id: Long) = Action.async { implicit request =>
     Future(service.getTodo(id)) map {
-      case Some(todo) => Ok(Json.toJson(TodoView(todo)))
+      case Some(todo) => Ok(Json.toJson(TodoView.fromModel(todo)))
       case None => NotFound
     }
   }
@@ -32,7 +32,7 @@ class TodoController @Inject()(service: TodoService) extends Controller {
     val order = (request.body \ "order").asOpt[Int].getOrElse(0)
 
     Future(service.addTodo(title, completed, order)) map {
-      case Some(todo) => Ok(Json.toJson(TodoView(todo)))
+      case Some(todo) => Ok(Json.toJson(TodoView.fromModel(todo)))
       case None => Ok("")
     }
   }
