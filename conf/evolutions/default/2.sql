@@ -1,0 +1,7 @@
+# --- !Ups
+
+ALTER TABLE todo ADD COLUMN ord INT NOT NULL DEFAULT 0;
+
+# --- !Downs
+
+ALTER TABLE todo DROP COLUMN ord;
