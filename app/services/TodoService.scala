@@ -29,6 +29,19 @@ class TodoService @Inject()(db: Database) {
     result.flatMap(getSingleTodo)
   }
 
+  def updateTodo(id: Long,
+                 title: Option[String] = None,
+                 completed: Option[Boolean] = None) = db.withConnection { implicit conn =>
+    getSingleTodo(id).map { todo =>
+      SQL("UPDATE todo SET title = {title}, completed = {completed} WHERE id = {id}")
+        .on("id" -> id, "title" -> title.getOrElse(todo.title), "completed" -> completed.getOrElse(todo.completed))
+        .executeUpdate()
+    } match {
+      case Some(x: Int) if x > 0 => getSingleTodo(id)
+      case _ => None
+    }
+  }
+
   def removeAllTodos() {
     db.withConnection { implicit conn =>
       SQL("DELETE FROM todo").execute()

@@ -2,3 +2,4 @@ GET           /todo            controllers.TodoController.index
 GET           /todo/:id        controllers.TodoController.get(id:Long)
 POST          /todo            controllers.TodoController.add
 DELETE        /todo            controllers.TodoController.remove
+PATCH         /todo/:id        controllers.TodoController.update(id:Long)
