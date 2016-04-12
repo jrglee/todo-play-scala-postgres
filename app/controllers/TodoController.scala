@@ -37,7 +37,7 @@ class TodoController @Inject()(service: TodoService) extends Controller {
     }
   }
 
-  def removeAll = Action.async { implicit request =>
+  def removeAll() = Action.async { implicit request =>
     Future(service.removeAllTodos()) map { todo =>
       Ok("")
     }

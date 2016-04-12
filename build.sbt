@@ -14,7 +14,8 @@ libraryDependencies ++= Seq(
   filters,
   "org.postgresql" % "postgresql" % "9.4.1208",
   "com.typesafe.play" %% "anorm" % "2.5.0",
-  "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.0" % Test
+  "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.0" % Test,
+  "org.mockito" % "mockito-core" % "1.10.19" % Test
 )
 
 resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"
