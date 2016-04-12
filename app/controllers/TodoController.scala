@@ -33,7 +33,7 @@ class TodoController @Inject()(service: TodoService) extends Controller {
 
     Future(service.addTodo(title, completed, order)) map {
       case Some(todo) => Ok(Json.toJson(TodoView.fromModel(todo)))
-      case None => Ok("")
+      case None => InternalServerError
     }
   }
 
@@ -54,7 +54,7 @@ class TodoController @Inject()(service: TodoService) extends Controller {
 
     Future(service.updateTodo(id, title, completed, order)) map {
       case Some(todo) => Ok(Json.toJson(TodoView.fromModel(todo)))
-      case None => Ok("")
+      case None => NotFound
     }
   }
 
