@@ -30,10 +30,16 @@ class TodoService @Inject()(db: Database) {
 
   def updateTodo(id: Long,
                  title: Option[String] = None,
-                 completed: Option[Boolean] = None) = db.withConnection { implicit conn =>
+                 completed: Option[Boolean] = None,
+                 order: Option[Int] = None) = db.withConnection { implicit conn =>
     getSingleTodo(id).map { todo =>
-      SQL("UPDATE todo SET title = {title}, completed = {completed} WHERE id = {id}")
-        .on("id" -> id, "title" -> title.getOrElse(todo.title), "completed" -> completed.getOrElse(todo.completed))
+      SQL("UPDATE todo SET title = {title}, completed = {completed}, ord = {order} WHERE id = {id}")
+        .on(
+          "id" -> id,
+          "title" -> title.getOrElse(todo.title),
+          "completed" -> completed.getOrElse(todo.completed),
+          "order" -> order.getOrElse(todo.order)
+        )
         .executeUpdate()
     } match {
       case Some(x: Int) if x > 0 => getSingleTodo(id)

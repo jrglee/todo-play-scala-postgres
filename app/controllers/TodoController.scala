@@ -50,7 +50,9 @@ class TodoController @Inject()(service: TodoService) extends Controller {
   def update(id: Long) = Action.async(BodyParsers.parse.tolerantJson) { implicit request =>
     val title = (request.body \ "title").asOpt[String]
     val completed = (request.body \ "completed").asOpt[Boolean]
-    Future(service.updateTodo(id, title, completed)) map {
+    val order = (request.body \ "order").asOpt[Int]
+
+    Future(service.updateTodo(id, title, completed, order)) map {
       case Some(todo) => Ok(Json.toJson(TodoView.fromModel(todo)))
       case None => Ok("")
     }
