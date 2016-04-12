@@ -37,10 +37,14 @@ class TodoController @Inject()(service: TodoService) extends Controller {
     }
   }
 
-  def remove = Action.async { implicit request =>
+  def removeAll = Action.async { implicit request =>
     Future(service.removeAllTodos()) map { todo =>
       Ok("")
     }
+  }
+
+  def remove(id: Long) = Action.async { implicit request =>
+    Future(service.removeTodo(id)) map { _ => Ok("") }
   }
 
   def update(id: Long) = Action.async(BodyParsers.parse.tolerantJson) { implicit request =>
@@ -51,4 +55,5 @@ class TodoController @Inject()(service: TodoService) extends Controller {
       case None => Ok("")
     }
   }
+
 }

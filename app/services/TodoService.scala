@@ -10,7 +10,6 @@ import play.api.db.Database
 
 @Singleton
 class TodoService @Inject()(db: Database) {
-
   val todoParser = long("id") ~ str("title") ~ int("ord") ~ bool("completed") map {
     case id ~ title ~ order ~ completed => Todo(id, title, order, completed)
   }
@@ -46,6 +45,10 @@ class TodoService @Inject()(db: Database) {
     db.withConnection { implicit conn =>
       SQL("DELETE FROM todo").execute()
     }
+  }
+
+  def removeTodo(id: Long) = db.withConnection { implicit conn =>
+    SQL("DELETE FROM todo WHERE id = {id}").on("id" -> id).executeUpdate()
   }
 
   private def getSingleTodo(id: Long)(implicit connection: Connection) =
