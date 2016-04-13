@@ -14,52 +14,55 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class TodoRepository @Inject()(db: Database) {
 
-  implicit val ec:ExecutionContext = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(30))
+  implicit val ec: ExecutionContext = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(30))
 
   val todoParser = long("id") ~ str("title") ~ int("ord") ~ bool("completed") map {
     case id ~ title ~ order ~ completed => Todo(id, title, order, completed)
   }
 
-  def getAllTodos = Future(db.withConnection { implicit conn =>
+  def withDb[T](body: => Connection => T): Future[T] = Future(db.withConnection(body(_)))
+
+  def getAllTodos = withDb { implicit conn =>
     SQL("SELECT * FROM todo ORDER BY ord").as(todoParser.*)
-  })
+  }
 
-  def getTodo(id: Long) = Future(db.withConnection { implicit conn => getSingleTodo(id) })
+  def getTodo(id: Long) = withDb { implicit conn => getSingleTodo(id) }
 
-  def addTodo(title: String, completed: Boolean, order: Int) = Future(db.withConnection { implicit conn =>
+  def addTodo(title: String, completed: Boolean, order: Int) = withDb { implicit conn =>
     val result: Option[Long] = SQL("INSERT INTO todo(id,title,completed,ord) values(default,{title},{completed},{order})")
       .on("title" -> title, "completed" -> completed, "order" -> order)
       .executeInsert()
 
     result.flatMap(getSingleTodo)
-  })
+  }
 
   def updateTodo(id: Long,
                  title: Option[String] = None,
                  completed: Option[Boolean] = None,
-                 order: Option[Int] = None) = Future(db.withConnection { implicit conn =>
-    getSingleTodo(id).map { todo =>
-      SQL("UPDATE todo SET title = {title}, completed = {completed}, ord = {order} WHERE id = {id}")
-        .on(
-          "id" -> id,
-          "title" -> title.getOrElse(todo.title),
-          "completed" -> completed.getOrElse(todo.completed),
-          "order" -> order.getOrElse(todo.order)
-        )
-        .executeUpdate()
-    } match {
-      case Some(x: Int) if x > 0 => getSingleTodo(id)
-      case _ => None
+                 order: Option[Int] = None) =
+    withDb { implicit conn =>
+      getSingleTodo(id).map { todo =>
+        SQL("UPDATE todo SET title = {title}, completed = {completed}, ord = {order} WHERE id = {id}")
+          .on(
+            "id" -> id,
+            "title" -> title.getOrElse(todo.title),
+            "completed" -> completed.getOrElse(todo.completed),
+            "order" -> order.getOrElse(todo.order)
+          )
+          .executeUpdate()
+      } match {
+        case Some(x: Int) if x > 0 => getSingleTodo(id)
+        case _ => None
+      }
     }
-  })
 
-  def removeAllTodos() = Future(db.withConnection { implicit conn =>
+  def removeAllTodos() = withDb { implicit conn =>
     SQL("DELETE FROM todo").execute()
-  })
+  }
 
-  def removeTodo(id: Long) = Future(db.withConnection { implicit conn =>
+  def removeTodo(id: Long) = withDb { implicit conn =>
     SQL("DELETE FROM todo WHERE id = {id}").on("id" -> id).executeUpdate()
-  })
+  }
 
   private def getSingleTodo(id: Long)(implicit connection: Connection) =
     SQL("SELECT * FROM todo WHERE id = {id}")
