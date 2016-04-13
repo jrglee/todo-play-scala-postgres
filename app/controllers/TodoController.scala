@@ -4,22 +4,22 @@ import javax.inject._
 
 import play.api.libs.json.Json
 import play.api.mvc._
-import services.TodoService
+import repositories.services.TodoRepository
 import views.TodoView
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton
-class TodoController @Inject()(service: TodoService) extends Controller {
+class TodoController @Inject()(repository: TodoRepository) extends Controller {
 
   def index = Action.async { implicit request =>
-    service.getAllTodos map { todos =>
+    repository.getAllTodos map { todos =>
       Ok(Json.toJson(todos.map(TodoView.fromModel)))
     }
   }
 
   def get(id: Long) = Action.async { implicit request =>
-    service.getTodo(id) map {
+    repository.getTodo(id) map {
       case Some(todo) => Ok(Json.toJson(TodoView.fromModel(todo)))
       case None => NotFound
     }
@@ -30,18 +30,18 @@ class TodoController @Inject()(service: TodoService) extends Controller {
     val completed = (request.body \ "completed").asOpt[Boolean].getOrElse(false)
     val order = (request.body \ "order").asOpt[Int].getOrElse(0)
 
-    service.addTodo(title, completed, order) map {
+    repository.addTodo(title, completed, order) map {
       case Some(todo) => Ok(Json.toJson(TodoView.fromModel(todo)))
       case None => InternalServerError
     }
   }
 
   def removeAll() = Action.async {
-    service.removeAllTodos() map { todo => Ok("") }
+    repository.removeAllTodos() map { todo => Ok("") }
   }
 
   def remove(id: Long) = Action.async {
-    service.removeTodo(id) map { _ => Ok("") }
+    repository.removeTodo(id) map { _ => Ok("") }
   }
 
   def update(id: Long) = Action.async(BodyParsers.parse.tolerantJson) { implicit request =>
@@ -49,7 +49,7 @@ class TodoController @Inject()(service: TodoService) extends Controller {
     val completed = (request.body \ "completed").asOpt[Boolean]
     val order = (request.body \ "order").asOpt[Int]
 
-    service.updateTodo(id, title, completed, order) map {
+    repository.updateTodo(id, title, completed, order) map {
       case Some(todo) => Ok(Json.toJson(TodoView.fromModel(todo)))
       case None => NotFound
     }

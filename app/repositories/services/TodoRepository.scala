@@ -1,4 +1,4 @@
-package services
+package repositories.services
 
 import java.sql.Connection
 import java.util.concurrent.Executors
@@ -12,7 +12,7 @@ import play.api.db.Database
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class TodoService @Inject()(db: Database) {
+class TodoRepository @Inject()(db: Database) {
 
   implicit val ec:ExecutionContext = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(30))
 

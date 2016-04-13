@@ -7,7 +7,7 @@ import org.scalatestplus.play.PlaySpec
 import play.api.mvc.Results
 import play.api.test.Helpers._
 import play.api.test._
-import services.TodoService
+import repositories.services.TodoRepository
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -17,13 +17,13 @@ class TodoControllerTest extends PlaySpec
   with MockitoSugar {
 
   trait Subject {
-    val service = mock[TodoService]
-    val controller = new TodoController(service)
+    val repository = mock[TodoRepository]
+    val controller = new TodoController(repository)
   }
 
   "TodoController#index" should {
     "list all TODOs" in new Subject {
-      when(service.getAllTodos).thenReturn(Future(List(Todo(1L, "My Todo", 10, completed = false))))
+      when(repository.getAllTodos).thenReturn(Future(List(Todo(1L, "My Todo", 10, completed = false))))
 
       val result = controller.index.apply(FakeRequest("GET", "http://localhost/todo"))
 
@@ -38,7 +38,7 @@ class TodoControllerTest extends PlaySpec
 
   "TodoController#get" should {
     "get existing TODO" in new Subject {
-      when(service.getTodo(10)).thenReturn(Future(Some(Todo(1L, "My Todo", 10, completed = false))))
+      when(repository.getTodo(10)).thenReturn(Future(Some(Todo(1L, "My Todo", 10, completed = false))))
 
       val result = controller.get(10).apply(FakeRequest("GET", "http://localhost/todo/10"))
 
@@ -51,7 +51,7 @@ class TodoControllerTest extends PlaySpec
     }
 
     "ignore inexisting TODOs" in new Subject {
-      when(service.getTodo(10)).thenReturn(Future(None))
+      when(repository.getTodo(10)).thenReturn(Future(None))
 
       val result = controller.get(10).apply(FakeRequest("GET", "http://localhost/todo/10"))
 
