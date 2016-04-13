@@ -20,7 +20,7 @@ class TodoRepository @Inject()(db: Database) {
     case id ~ title ~ order ~ completed => Todo(id, title, order, completed)
   }
 
-  def withDb[T](body: => Connection => T): Future[T] = Future(db.withConnection(body(_)))
+  def withDb[T](body: Connection => T): Future[T] = Future(db.withConnection(body(_)))
 
   def getAllTodos = withDb { implicit conn =>
     SQL("SELECT * FROM todo ORDER BY ord").as(todoParser.*)
