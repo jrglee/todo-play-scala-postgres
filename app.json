@@ -1,0 +1,6 @@
+{
+	"name": "TODO backend with Play 2.5",
+  "description": "TODO backend implementation with Play 2.5, Scala and Postgres",
+  "image": "heroku/scala",
+  "addons": [ "heroku-postgresql" ]
+}
