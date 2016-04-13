@@ -1,4 +1,4 @@
-package repositories.services
+package repositories
 
 import java.sql.Connection
 import java.util.concurrent.Executors

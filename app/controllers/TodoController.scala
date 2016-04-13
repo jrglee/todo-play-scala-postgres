@@ -4,7 +4,7 @@ import javax.inject._
 
 import play.api.libs.json.Json
 import play.api.mvc._
-import repositories.services.TodoRepository
+import repositories.TodoRepository
 import views.TodoView
 
 import scala.concurrent.ExecutionContext.Implicits.global

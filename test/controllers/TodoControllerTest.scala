@@ -7,7 +7,7 @@ import org.scalatestplus.play.PlaySpec
 import play.api.mvc.Results
 import play.api.test.Helpers._
 import play.api.test._
-import repositories.services.TodoRepository
+import repositories.TodoRepository
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
