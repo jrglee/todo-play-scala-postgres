@@ -8,19 +8,18 @@ import services.TodoService
 import views.TodoView
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 
 @Singleton
 class TodoController @Inject()(service: TodoService) extends Controller {
 
   def index = Action.async { implicit request =>
-    Future(service.getAllTodos) map { todos =>
+    service.getAllTodos map { todos =>
       Ok(Json.toJson(todos.map(TodoView.fromModel)))
     }
   }
 
   def get(id: Long) = Action.async { implicit request =>
-    Future(service.getTodo(id)) map {
+    service.getTodo(id) map {
       case Some(todo) => Ok(Json.toJson(TodoView.fromModel(todo)))
       case None => NotFound
     }
@@ -31,20 +30,18 @@ class TodoController @Inject()(service: TodoService) extends Controller {
     val completed = (request.body \ "completed").asOpt[Boolean].getOrElse(false)
     val order = (request.body \ "order").asOpt[Int].getOrElse(0)
 
-    Future(service.addTodo(title, completed, order)) map {
+    service.addTodo(title, completed, order) map {
       case Some(todo) => Ok(Json.toJson(TodoView.fromModel(todo)))
       case None => InternalServerError
     }
   }
 
-  def removeAll() = Action.async { implicit request =>
-    Future(service.removeAllTodos()) map { todo =>
-      Ok("")
-    }
+  def removeAll() = Action.async {
+    service.removeAllTodos() map { todo => Ok("") }
   }
 
-  def remove(id: Long) = Action.async { implicit request =>
-    Future(service.removeTodo(id)) map { _ => Ok("") }
+  def remove(id: Long) = Action.async {
+    service.removeTodo(id) map { _ => Ok("") }
   }
 
   def update(id: Long) = Action.async(BodyParsers.parse.tolerantJson) { implicit request =>
@@ -52,7 +49,7 @@ class TodoController @Inject()(service: TodoService) extends Controller {
     val completed = (request.body \ "completed").asOpt[Boolean]
     val order = (request.body \ "order").asOpt[Int]
 
-    Future(service.updateTodo(id, title, completed, order)) map {
+    service.updateTodo(id, title, completed, order) map {
       case Some(todo) => Ok(Json.toJson(TodoView.fromModel(todo)))
       case None => NotFound
     }
