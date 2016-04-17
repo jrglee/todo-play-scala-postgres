@@ -87,17 +87,17 @@ class TodoControllerTest extends PlaySpec
   }
 
   "TodoController#removeAll" should {
-    "remove all TODOs" in  new Subject {
-      when(repository.removeAllTodos).thenReturn(Future(true))
+    "remove all TODOs" in new Subject {
+      when(repository.removeAllTodos()).thenReturn(Future(true))
 
-      val result = controller.removeAll.apply(FakeRequest(DELETE, "http://localhost/todo"))
+      val result = controller.removeAll().apply(FakeRequest(DELETE, "http://localhost/todo"))
 
       status(result) mustEqual OK
     }
   }
 
-  "TodoController#remove(todo)" should {
-    "remove single TODO" in  new Subject {
+  "TodoController#remove" should {
+    "remove single TODO" in new Subject {
       when(repository.removeTodo(1L)).thenReturn(Future(1))
 
       val result = controller.remove(1L).apply(FakeRequest(DELETE, "http://localhost/todo/1"))
@@ -106,5 +106,56 @@ class TodoControllerTest extends PlaySpec
     }
   }
 
+  "TodoController#update" should {
+    "update title" in new Subject {
+      when(repository.updateTodo(1L, Some("new title"), None, None)).thenReturn(Future(Some(Todo(1L, "new title", 10, false))))
 
+      val fakeRequest = FakeRequest(PATCH, "http://localhost/todo/1", FakeHeaders(),
+        Json.parse(
+          """
+            |{
+            |  "title": "new title"
+            |}
+          """.stripMargin))
+
+      val result = controller.update(1L).apply(fakeRequest)
+
+      status(result) mustEqual OK
+      (contentAsJson(result) \ "title").as[String] mustEqual "new title"
+    }
+
+    "mark completion" in new Subject {
+      when(repository.updateTodo(1L, None, Some(true), None)).thenReturn(Future(Some(Todo(1L, "My Todo", 10, true))))
+
+      val fakeRequest = FakeRequest(PATCH, "http://localhost/todo/1", FakeHeaders(),
+        Json.parse(
+          """
+            |{
+            |  "completed": true
+            |}
+          """.stripMargin))
+
+      val result = controller.update(1L).apply(fakeRequest)
+
+      status(result) mustEqual OK
+      (contentAsJson(result) \ "completed").as[Boolean] mustBe true
+    }
+
+    "update order" in new Subject {
+      when(repository.updateTodo(1L, None, None, Some(5))).thenReturn(Future(Some(Todo(1L, "My Todo", 5, false))))
+
+      val fakeRequest = FakeRequest(PATCH, "http://localhost/todo/1", FakeHeaders(),
+        Json.parse(
+          """
+            |{
+            |  "order": 5
+            |}
+          """.stripMargin))
+
+      val result = controller.update(1L).apply(fakeRequest)
+
+      status(result) mustEqual OK
+      (contentAsJson(result) \ "order").as[Int] mustEqual 5
+    }
+  }
 }
