@@ -1,6 +1,9 @@
 machine:
   java:
     version: openjdk8
+dependencies:
+  override:
+    - ./activator update
 test:
   override:
-    - ./activator.sh test
+    - ./activator test
