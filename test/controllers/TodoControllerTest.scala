@@ -4,6 +4,7 @@ import models.Todo
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.PlaySpec
+import play.api.libs.json.Json
 import play.api.mvc.Results
 import play.api.test.Helpers._
 import play.api.test._
@@ -25,14 +26,15 @@ class TodoControllerTest extends PlaySpec
     "list all TODOs" in new Subject {
       when(repository.getAllTodos).thenReturn(Future(List(Todo(1L, "My Todo", 10, completed = false))))
 
-      val result = controller.index.apply(FakeRequest("GET", "http://localhost/todo"))
+      val result = controller.index.apply(FakeRequest(GET, "http://localhost/todo"))
 
       status(result) mustEqual OK
 
-      (contentAsJson(result) \ 0 \ "title").as[String] mustEqual "My Todo"
-      (contentAsJson(result) \ 0 \ "order").as[Int] mustEqual 10
-      (contentAsJson(result) \ 0 \ "completed").as[Boolean] mustBe false
-      (contentAsJson(result) \ 0 \ "url").as[String] mustEqual "http://localhost/todo/1"
+      val json = contentAsJson(result)
+      (json \ 0 \ "title").as[String] mustEqual "My Todo"
+      (json \ 0 \ "order").as[Int] mustEqual 10
+      (json \ 0 \ "completed").as[Boolean] mustBe false
+      (json \ 0 \ "url").as[String] mustEqual "http://localhost/todo/1"
     }
   }
 
@@ -40,22 +42,47 @@ class TodoControllerTest extends PlaySpec
     "get existing TODO" in new Subject {
       when(repository.getTodo(10)).thenReturn(Future(Some(Todo(1L, "My Todo", 10, completed = false))))
 
-      val result = controller.get(10).apply(FakeRequest("GET", "http://localhost/todo/10"))
+      val result = controller.get(10).apply(FakeRequest(GET, "http://localhost/todo/10"))
 
       status(result) mustEqual OK
 
-      (contentAsJson(result) \ "title").as[String] mustEqual "My Todo"
-      (contentAsJson(result) \ "order").as[Int] mustEqual 10
-      (contentAsJson(result) \ "completed").as[Boolean] mustBe false
-      (contentAsJson(result) \ "url").as[String] mustEqual "http://localhost/todo/1"
+      val json = contentAsJson(result)
+      (json \ "title").as[String] mustEqual "My Todo"
+      (json \ "order").as[Int] mustEqual 10
+      (json \ "completed").as[Boolean] mustBe false
+      (json \ "url").as[String] mustEqual "http://localhost/todo/1"
     }
 
-    "ignore inexisting TODOs" in new Subject {
+    "ignore inexistent TODOs" in new Subject {
       when(repository.getTodo(10)).thenReturn(Future(None))
 
       val result = controller.get(10).apply(FakeRequest("GET", "http://localhost/todo/10"))
 
       status(result) mustEqual NOT_FOUND
+    }
+  }
+
+  "TodoController#add" should {
+    "add TODO with title" in new Subject {
+      when(repository.addTodo("My Todo", completed = false, 0)).thenReturn(Future(Some(Todo(1L, "My Todo", 10, completed = false))))
+
+      val fakeRequest = FakeRequest(POST, "http://localhost/todo", FakeHeaders(),
+        Json.parse(
+          """
+            |{
+            |  "title": "My Todo"
+            |}
+          """.stripMargin))
+
+      val result = controller.add.apply(fakeRequest)
+
+      status(result) mustEqual OK
+
+      val json = contentAsJson(result)
+      (json \ "title").as[String] mustEqual "My Todo"
+      (json \ "order").as[Int] mustEqual 10
+      (json \ "completed").as[Boolean] mustBe false
+      (json \ "url").as[String] mustEqual "http://localhost/todo/1"
     }
   }
 }
