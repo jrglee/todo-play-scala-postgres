@@ -36,8 +36,8 @@ class TodoController @Inject()(repository: TodoRepository) extends Controller {
     }
   }
 
-  def removeAll() = Action.async {
-    repository.removeAllTodos() map { todo => Ok("") }
+  def removeAll = Action.async {
+    repository.removeAllTodos() map { _ => Ok("") }
   }
 
   def remove(id: Long) = Action.async {

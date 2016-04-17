@@ -85,4 +85,26 @@ class TodoControllerTest extends PlaySpec
       (json \ "url").as[String] mustEqual "http://localhost/todo/1"
     }
   }
+
+  "TodoController#removeAll" should {
+    "remove all TODOs" in  new Subject {
+      when(repository.removeAllTodos).thenReturn(Future(true))
+
+      val result = controller.removeAll.apply(FakeRequest(DELETE, "http://localhost/todo"))
+
+      status(result) mustEqual OK
+    }
+  }
+
+  "TodoController#remove(todo)" should {
+    "remove single TODO" in  new Subject {
+      when(repository.removeTodo(1L)).thenReturn(Future(1))
+
+      val result = controller.remove(1L).apply(FakeRequest(DELETE, "http://localhost/todo/1"))
+
+      status(result) mustEqual OK
+    }
+  }
+
+
 }
